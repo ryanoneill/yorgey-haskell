@@ -3,6 +3,9 @@ module LogAnalysis where
 
 import Log
 
+parse :: String -> [LogMessage]
+parse = map parseMessage . lines
+
 parseMessage :: String -> LogMessage
 parseMessage m = case m of
   'E':_ -> parseError m
