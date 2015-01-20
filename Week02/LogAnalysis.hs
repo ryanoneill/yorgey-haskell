@@ -61,3 +61,35 @@ segment p xs n
                     else snd parts
         partOne = fst parts
         parts   = span p xs
+
+getTimestamp :: LogMessage -> TimeStamp
+getTimestamp (LogMessage _ ts _) = ts
+getTimestamp _ = 0
+
+lesserTimestamp :: LogMessage -> LogMessage -> Bool
+lesserTimestamp a b = getTimestamp a < getTimestamp b
+
+insert :: LogMessage -> MessageTree -> MessageTree
+insert (Unknown _) t = t
+insert m Leaf = Node Leaf m Leaf
+insert m (Node t1 lm t2) = if (lesserTimestamp m lm)
+  then Node (insert m t1) lm t2
+  else Node t1 lm (insert m t2)
+
+build :: [LogMessage] -> MessageTree
+build = foldr insert Leaf
+
+inOrder :: MessageTree -> [LogMessage]
+inOrder Leaf = []
+inOrder (Node t1 lm t2) = (inOrder t1) ++ [lm] ++ (inOrder t2)
+
+severityAtLeast50 :: LogMessage -> Bool
+severityAtLeast50 (LogMessage (Error sev) _ _) = sev >= 50
+severityAtLeast50 _                            = False
+
+getMessage :: LogMessage -> String
+getMessage (LogMessage _ _ m) = m
+getMessage (Unknown m) = m
+
+whatWentWrong :: [LogMessage] -> [String]
+whatWentWrong = map getMessage . filter severityAtLeast50 . inOrder . build
