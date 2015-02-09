@@ -20,6 +20,7 @@ localMaxima xs = map s $ filter p $ zip3 xs ys zs
     zs = tail ys
     ys = tail xs
 
+histogram :: [Integer] -> String
 histogram xs = (intercalate "\n" $ transpose stars) ++ "\n==========\n0123456789\n"
   where
     stars = map (\i -> replicate (maximum counts - i) ' ' ++ replicate i '*') counts
